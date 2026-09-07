@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connecting… — OmniPost</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+  body { display: grid; place-items: center; min-height: 100vh; }
+  .wrap { padding: 24px; text-align: center; }
+  .big { font-size: 40px; margin-bottom: 10px; }
+  .fallback { margin-top: 26px; font-size: 14px; color: var(--muted); }
+  .err { color: #f87171; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="big">◎</div>
+  <h1 id="headline">Finishing the connection…</h1>
+  <p id="detail">Handing the authorisation back to OmniPost on your computer.</p>
+  <p class="fallback" id="fallback" hidden>
+    If nothing happens, make sure OmniPost is running and
+    <a id="manual" href="#">click here to continue</a>.
+  </p>
+</div>
+
+<script>
+// Some platforms refuse a plain http://127.0.0.1 redirect URI and insist on a
+// public HTTPS address. This page is that public address: it does nothing but
+// hand the authorisation code straight back to OmniPost running locally.
+//
+// Nothing is stored here and nothing is sent anywhere else. There is no
+// analytics, no third-party script, and no server behind this page - it is a
+// static file, so the code in the URL never reaches anyone but your own machine.
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var state = params.get("state") || "";
+  var error = params.get("error");
+
+  // OmniPost prefixes the state with the platform, e.g. "tiktok.a1b2c3…",
+  // so one bridge page can serve every platform.
+  var platform = state.split(".")[0];
+  var VALID = ["tiktok", "instagram", "facebook", "youtube"];
+
+  function fail(message) {
+    document.getElementById("headline").textContent = "Could not finish";
+    document.getElementById("headline").className = "err";
+    document.getElementById("detail").textContent = message;
+  }
+
+  if (error) {
+    fail("The platform reported: " + error);
+    return;
+  }
+  if (VALID.indexOf(platform) === -1) {
+    fail("This link is missing the platform it belongs to. Start the connection again from OmniPost.");
+    return;
+  }
+
+  var port = params.get("port") || "8000";
+  if (!/^\d{2,5}$/.test(port)) port = "8000";
+
+  var target =
+    "http://127.0.0.1:" + port + "/auth/" + platform + "/callback" + window.location.search;
+
+  document.getElementById("manual").href = target;
+  document.getElementById("fallback").hidden = false;
+  window.location.replace(target);
+})();
+</script>
+</body>
+</html>

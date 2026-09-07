@@ -1,3 +1,21 @@
+# OmniPost — public pages
+
+These are the public pages required by social platforms (TikTok, Meta) before they
+approve a developer application: an app description, a privacy policy, terms of
+service, and an OAuth redirect page.
+
+**Live site:** https://waelsaballyl.github.io/omnipost-site/
+
+- [App description](https://waelsaballyl.github.io/omnipost-site/)
+- [Privacy Policy](https://waelsaballyl.github.io/omnipost-site/privacy.html)
+- [Terms of Service](https://waelsaballyl.github.io/omnipost-site/terms.html)
+- [OAuth redirect](https://waelsaballyl.github.io/omnipost-site/oauth/callback.html)
+
+All three policy pages are written in English. The notes below are the author's own
+setup instructions, in Arabic.
+
+---
+
 # موقع OmniPost العام
 
 هذا المجلد هو الجزء اللي لازم يكون **على الإنترنت**. الأداة نفسها تبقى على جهازك —

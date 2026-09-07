@@ -52,8 +52,18 @@
     fail("The platform reported: " + error);
     return;
   }
+  if (!state) {
+    // Opened directly rather than arrived at from a sign-in - a normal thing to
+    // do while setting the redirect URI up, so say so plainly.
+    document.getElementById("headline").textContent = "Nothing to finish here";
+    document.getElementById("detail").textContent =
+      "This page only does one job: it hands a sign-in back to OmniPost on your " +
+      "computer. It works when a platform sends you here at the end of connecting " +
+      "an account — opening it directly does nothing, which is expected.";
+    return;
+  }
   if (VALID.indexOf(platform) === -1) {
-    fail("This link is missing the platform it belongs to. Start the connection again from OmniPost.");
+    fail("This sign-in did not say which platform it came from. Start the connection again from OmniPost.");
     return;
   }
 

@@ -34,13 +34,15 @@
 // static file, so the code in the URL never reaches anyone but your own machine.
 (function () {
   var params = new URLSearchParams(window.location.search);
-  var state = params.get("state") || "";
+  // Threads hands the state back wrapped in quotes, so strip any the platform
+  // added before reading the platform prefix out of it.
+  var state = (params.get("state") || "").replace(/^["'\s]+|["'\s]+$/g, "");
   var error = params.get("error");
 
   // OmniPost prefixes the state with the platform, e.g. "tiktok.a1b2c3…",
   // so one bridge page can serve every platform.
   var platform = state.split(".")[0];
-  var VALID = ["tiktok", "instagram", "facebook", "youtube"];
+  var VALID = ["tiktok", "instagram", "facebook", "youtube", "threads"];
 
   function fail(message) {
     document.getElementById("headline").textContent = "Could not finish";
@@ -70,8 +72,10 @@
   var port = params.get("port") || "8000";
   if (!/^\d{2,5}$/.test(port)) port = "8000";
 
+  // Forward the cleaned state so the local side matches what it issued.
+  params.set("state", state);
   var target =
-    "http://127.0.0.1:" + port + "/auth/" + platform + "/callback" + window.location.search;
+    "http://127.0.0.1:" + port + "/auth/" + platform + "/callback?" + params.toString();
 
   document.getElementById("manual").href = target;
   document.getElementById("fallback").hidden = false;

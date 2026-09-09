@@ -74,12 +74,38 @@
 
   // Forward the cleaned state so the local side matches what it issued.
   params.set("state", state);
-  var target =
-    "http://127.0.0.1:" + port + "/auth/" + platform + "/callback?" + params.toString();
+  var tail = "/auth/" + platform + "/callback?" + params.toString();
+  var here = "http://127.0.0.1:" + port + tail;
 
-  document.getElementById("manual").href = target;
-  document.getElementById("fallback").hidden = false;
-  window.location.replace(target);
+  function send(target) {
+    document.getElementById("manual").href = target;
+    document.getElementById("fallback").hidden = false;
+    window.location.replace(target);
+  }
+
+  // Where OmniPost is actually running.
+  //
+  // Sending the code to 127.0.0.1 only works when the browser is on the same
+  // machine as OmniPost. Anyone connecting an account from their own computer
+  // would be sent to their own machine instead, where nothing is listening.
+  //
+  // So the address is read from a file published beside this page. It changes
+  // whenever the tunnel is restarted; this page does not, which is what the
+  // platforms need - the redirect URI registered with them stays the same for
+  // ever. If the file is missing or stale, the local address is still tried,
+  // because that is the right answer when you are on the machine itself.
+  var request = new XMLHttpRequest();
+  request.open("GET", "where.json?t=" + Date.now(), true);
+  request.timeout = 4000;
+  request.onload = function () {
+    var base = "";
+    try {
+      base = (JSON.parse(request.responseText) || {}).app_url || "";
+    } catch (e) { /* fall through to the local address */ }
+    send(base ? base.replace(/\/+$/, "") + tail : here);
+  };
+  request.onerror = request.ontimeout = function () { send(here); };
+  request.send();
 })();
 </script>
 </body>

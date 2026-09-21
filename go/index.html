@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
 <title>Opening OmniPost…</title>
 <link rel="stylesheet" href="../style.css">
 <style>
@@ -68,9 +69,18 @@
     detail.textContent = message;
   }
 
-  function offer(target, delay, lead) {
-    manual.href = target;
+  function offer(target, delay, lead, linked) {
     manual.textContent = target;
+    // When the address is known to be dead, show it to be read and copied but
+    // not clicked - a link there just walks the visitor into the browser's own
+    // DNS error, which is the thing this page exists to prevent.
+    if (linked === false) {
+      manual.removeAttribute("href");
+      manual.style.color = "inherit";
+      manual.style.textDecoration = "none";
+    } else {
+      manual.href = target;
+    }
     // Nothing is about to move on its own when there is no delay, so the
     // standing "if this does not move" line would be a lie in those branches.
     document.getElementById("lead").textContent =
@@ -161,7 +171,7 @@
             "It comes back as soon as whoever runs it starts it again."
           : "The last posted address has stopped answering. " +
             "It comes back as soon as whoever runs it starts it again.";
-        offer(target, null, "The address that was posted:");
+        offer(target, null, "The address that was posted:", false);
         return;
       }
 

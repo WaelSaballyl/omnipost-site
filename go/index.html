@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Opening OmniPost…</title>
+<link rel="stylesheet" href="../style.css">
+<style>
+  body { display: grid; place-items: center; min-height: 100vh; }
+  .door { padding: 24px; text-align: center; max-width: 520px; }
+  .big { font-size: 40px; margin-bottom: 10px; color: var(--accent); }
+  .note { margin-top: 26px; font-size: 14px; color: var(--muted); }
+  .link { word-break: break-all; }
+  .err { color: #f87171; }
+  .warn { color: #fbbf24; }
+</style>
+</head>
+<body>
+<div class="door">
+  <div class="big">◎</div>
+  <h1 id="headline">Opening OmniPost…</h1>
+  <p id="detail">Finding out where it is running right now.</p>
+  <p class="note" id="note" hidden>
+    <span id="lead">If this does not move on its own,</span>
+    <a id="manual" class="link" href="#">open it here</a>.
+  </p>
+</div>
+
+<script>
+// The permanent front door.
+//
+// OmniPost runs on a home machine behind a Cloudflare tunnel, and a free tunnel
+// hands out a different address every time it is restarted. That is fine for the
+// OAuth bridge next door, which the platforms reach on a fixed URL and which
+// looks the moving address up in where.json. People had no such fixed URL: they
+// were sent a new trycloudflare.com link after every restart.
+//
+// This page is that missing fixed URL. It reads the same where.json the bridge
+// reads and forwards the visitor to wherever OmniPost is today. Bookmark this
+// and the bookmark never goes stale.
+//
+// Static file, no server, no analytics, nothing stored. It only reads one small
+// JSON file published beside it.
+(function () {
+  var headline = document.getElementById("headline");
+  var detail = document.getElementById("detail");
+  var note = document.getElementById("note");
+  var manual = document.getElementById("manual");
+
+  var params = new URLSearchParams(window.location.search);
+
+  // `?to=/settings.html` opens a specific page instead of the app root. Only a
+  // plain single-slash path is accepted, so this cannot be used to bounce
+  // someone to another site.
+  var to = params.get("to") || "/";
+  // Checked with plain string tests rather than a regex: it has to reject a
+  // protocol-relative "//evil.com" and a backslash Windows-style path, and
+  // spelling those inside a character class is how this gets quietly broken.
+  if (to.charAt(0) !== "/" || to.charAt(1) === "/" || to.charAt(1) === "\\") to = "/";
+
+  // `?stay=1` shows the address without jumping, for copying it into a message.
+  var stay = params.get("stay") === "1";
+
+  function fail(title, message) {
+    headline.textContent = title;
+    headline.className = "err";
+    detail.textContent = message;
+  }
+
+  function offer(target, delay, lead) {
+    manual.href = target;
+    manual.textContent = target;
+    // Nothing is about to move on its own when there is no delay, so the
+    // standing "if this does not move" line would be a lie in those branches.
+    document.getElementById("lead").textContent =
+      lead || "If this does not move on its own,";
+    note.hidden = false;
+    if (delay !== null) window.setTimeout(function () {
+      window.location.replace(target);
+    }, delay);
+  }
+
+  function ageText(seconds) {
+    if (seconds < 90) return "moments ago";
+    if (seconds < 5400) return Math.round(seconds / 60) + " minutes ago";
+    if (seconds < 172800) return Math.round(seconds / 3600) + " hours ago";
+    return Math.round(seconds / 86400) + " days ago";
+  }
+
+  var request = new XMLHttpRequest();
+  request.open("GET", "../oauth/where.json?t=" + Date.now(), true);
+  request.timeout = 6000;
+
+  request.onload = function () {
+    var where = {};
+    try { where = JSON.parse(request.responseText) || {}; } catch (e) { /* handled below */ }
+
+    var base = (where.app_url || "").replace(/\/+$/, "");
+    if (!/^https:\/\//.test(base)) {
+      fail("OmniPost is not published right now",
+           "No address has been posted yet. Whoever runs it needs to start it and run share.py.");
+      return;
+    }
+
+    var target = base + to;
+
+    // updated_at is written as a unix timestamp by share.py. A zero means the
+    // file was hand-written before that was added, so age is simply unknown -
+    // not a reason to hold anything up.
+    var stamp = Number(where.updated_at) || 0;
+    var age = stamp > 0 ? Math.max(0, Math.floor(Date.now() / 1000) - stamp) : -1;
+
+    if (stay) {
+      headline.textContent = "OmniPost is at";
+      detail.textContent = age >= 0
+        ? "This address was posted " + ageText(age) + "."
+        : "This is the last address that was posted.";
+      offer(target, null, "It is at");
+      return;
+    }
+
+    // A tunnel left up for days is unusual - the address is probably from a run
+    // that has since ended. Say so rather than dropping the visitor onto a
+    // Cloudflare error page with no explanation.
+    if (age > 172800) {
+      headline.textContent = "This address may be dead";
+      headline.className = "warn";
+      detail.textContent =
+        "It was posted " + ageText(age) + ", and a tunnel rarely stays up that long. " +
+        "Try it anyway - if you get a Cloudflare error, OmniPost is simply not running.";
+      offer(target, null, "Try it here:");
+      return;
+    }
+
+    detail.textContent = "Sending you to the machine it is running on.";
+    offer(target, 900);
+  };
+
+  request.onerror = request.ontimeout = function () {
+    fail("Could not check where OmniPost is",
+         "The address file would not load. Check your connection and refresh.");
+  };
+
+  request.send();
+})();
+</script>
+</body>
+</html>

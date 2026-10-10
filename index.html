@@ -1,61 +1,519 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OmniPost — Publish one clip to every platform</title>
-<link rel="stylesheet" href="./style.css">
+<title>OmniPost — مقطعك بينزل لكل المنصات لحاله</title>
+<meta name="description" content="OmniPost بيقص أحلى لقطات مقطعك، بيحط شكل قناتك، وبينشره على يوتيوب وتيك توك وإنستقرام وفيسبوك وثريدز بضغطة وحدة. لأي محتوى: علوم، تقنية، قصص، سيارات.">
+<meta property="og:title" content="OmniPost — مقطعك بينزل لكل المنصات لحاله">
+<meta property="og:description" content="مقطع واحد، كل المنصات، بضغطة وحدة.">
+<link rel="icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Amiri:ital,wght@1,700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #09090B;
+  --ink: #EDEDF0;
+  --ink-2: #A6A6AE;
+  --ink-3: #6E6E77;
+  --glass: rgba(255, 255, 255, .035);
+  --glass-2: rgba(255, 255, 255, .06);
+  --edge: rgba(255, 255, 255, .09);
+  --lime: #4DA3FF;
+  --lime-rgb: 77, 163, 255;
+  --lime-deep: #2F7FE0;
+  --lime-ink: #04111F;
+  --lime-dim: rgba(var(--lime-rgb), .14);
+  --violet: #9C82FF;
+  --sans: "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --serif: "Amiri", serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+/* colour trials: ?c=orange, or the swatches at the bottom */
+:root[data-c="lime"]   { --lime: #C8F542; --lime-rgb: 200, 245, 66; --lime-deep: #95C22C; --lime-ink: #10170A; }
+:root[data-c="orange"] { --lime: #FF8A1F; --lime-rgb: 255, 138, 31; --lime-deep: #D2600A; --lime-ink: #1E0E02; }
+:root[data-c="cyan"]   { --lime: #3FE0F5; --lime-rgb: 63, 224, 245; --lime-deep: #1A9FC0; --lime-ink: #04161A; }
+:root[data-c="gold"]   { --lime: #FFC83D; --lime-rgb: 255, 200, 61; --lime-deep: #D49A12; --lime-ink: #1C1402; }
+:root[data-c="pink"]   { --lime: #FF5C8A; --lime-rgb: 255, 92, 138; --lime-deep: #D12E60; --lime-ink: #1E050C; }
+.swatches { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; gap: 8px; padding: 8px 10px; border-radius: 99px; background: rgba(10,12,11,.85); border: 1px solid var(--edge); backdrop-filter: blur(10px); }
+.swatches button { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; background: var(--sw); cursor: pointer; }
+.swatches button[aria-pressed="true"] { border-color: #fff; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.7 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; border-radius: 8px; }
+.wrap { width: min(1200px, 100% - 32px); margin-inline: auto; position: relative; }
+em.s { font-family: var(--serif); font-style: italic; font-weight: 700; letter-spacing: 0; color: var(--ink); }
+.mono { font-family: var(--mono); font-size: 12px; color: var(--ink-3); direction: ltr; unicode-bidi: isolate; }
+
+/* the light ribbons, behind everything */
+#aurora { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.page { position: relative; z-index: 1; }
+
+/* --- nav ------------------------------------------------------------------------ */
+.nav { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(14px); background: rgba(9, 9, 11, .55); border-bottom: 1px solid rgba(255,255,255,.05); }
+.nav .wrap { display: flex; align-items: center; gap: 28px; height: 66px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
+.brand i { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: var(--lime); color: var(--lime-ink); font-style: normal; font-weight: 700; font-size: 15px; }
+.nav nav { display: flex; gap: 26px; font-size: 14px; color: var(--ink-2); }
+.nav nav a:hover { color: var(--ink); }
+.status { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 99px; border: 1px solid var(--edge); font-size: 12.5px; color: var(--ink-2); }
+.status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 10px var(--lime); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 20px; border-radius: 99px; font: 600 14.5px/1 var(--sans); border: 0; cursor: pointer; }
+.btn.lime { background: var(--lime); color: var(--lime-ink); box-shadow: 0 0 30px -6px rgba(var(--lime-rgb), .55); }
+.btn.lime:hover { filter: brightness(1.06); }
+.btn.ghost { background: var(--glass-2); color: var(--ink); border: 1px solid var(--edge); }
+.btn.ghost:hover { background: rgba(255,255,255,.09); }
+
+/* --- hero ------------------------------------------------------------------------- */
+.hero { padding: 88px 0 110px; }
+.hero .wrap { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; }
+.pill { display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 8px; border: 1px solid var(--edge); background: var(--glass); font-size: 12.5px; color: var(--ink-2); }
+.pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--lime); }
+.hero h1 { margin: 22px 0 18px; font-weight: 600; font-size: clamp(40px, 5.4vw, 68px); line-height: 1.15; letter-spacing: -.01em; }
+.hero h1 em.s { font-size: 1.08em; }
+.hero p { margin: 0 0 30px; max-width: 34ch; font-size: 17px; color: var(--ink-2); }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.hero .fine { display: block; margin-top: 18px; text-align: right; font-size: 13px; color: var(--ink-3); }
+
+/* glass panel */
+.panel { position: relative; border-radius: 18px; background: linear-gradient(180deg, rgba(20, 20, 24, .78), rgba(11, 11, 13, .82)); border: 1px solid var(--edge); box-shadow: 0 40px 80px -40px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.05); backdrop-filter: blur(6px); }
+.panel-head { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 13px; color: var(--ink-2); }
+.panel-head .run { margin-inline-start: auto; color: var(--lime); font-family: var(--mono); font-size: 12px; }
+
+/* the publishing road: one lane per platform */
+.lanes { padding: 16px 18px 10px; display: grid; gap: 9px; }
+.ramp { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 13px; }
+.ramp .chip { padding: 7px 12px; border-radius: 10px; background: rgba(17,17,20,.95); border: 1px solid var(--edge); line-height: 1.35; }
+.ramp .chip small { display: block; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); direction: ltr; text-align: right; }
+.ramp .chip.done { border-color: rgba(var(--lime-rgb), .45); }
+.ramp .join { flex: 1; height: 2px; background: repeating-linear-gradient(to left, rgba(255,255,255,.2) 0 8px, transparent 8px 14px); }
+.ramp .join.live { background: repeating-linear-gradient(to left, var(--lime) 0 8px, transparent 8px 14px); background-size: 28px 2px; animation: road .6s linear infinite; }
+.lane { display: grid; grid-template-columns: 70px 1fr 96px; align-items: center; gap: 12px; height: 38px; font-size: 13px; }
+.road { position: relative; height: 30px; border-radius: 8px; background: rgba(255,255,255,.025); border: 1px solid rgba(255,255,255,.06); overflow: hidden; }
+.road::before { content: ""; position: absolute; inset-inline: 10px; top: 50%; height: 2px; margin-top: -1px; background: repeating-linear-gradient(to left, rgba(255,255,255,.14) 0 14px, transparent 14px 28px); background-size: 28px 2px; }
+.lane.live .road::before { animation: road .5s linear infinite; }
+@keyframes road { to { background-position: -28px 0; } }
+.clip { position: absolute; top: 50%; inset-inline-start: 6px; width: 30px; height: 18px; margin-top: -9px; border-radius: 5px; background: var(--lime); box-shadow: 0 0 14px rgba(var(--lime-rgb), .7); opacity: 0; transition: inset-inline-start 1.05s cubic-bezier(.6,0,.3,1), opacity .3s; }
+.clip::before { content: ""; position: absolute; top: 50%; inset-inline-end: 100%; width: 70px; height: 4px; margin-top: -2px; background: linear-gradient(to left, rgba(var(--lime-rgb), .55), transparent); }
+.clip::after { content: ""; position: absolute; inset: 0; margin: auto; width: 0; height: 0; border-block: 4px solid transparent; border-inline-end: 6px solid var(--lime-ink); }
+.lane.live .clip { opacity: 1; }
+.lane.done .clip { inset-inline-start: calc(100% - 36px); opacity: 1; }
+.lane .st { font-family: var(--mono); font-size: 11px; color: var(--ink-3); direction: ltr; text-align: left; }
+.lane.done .st { color: var(--lime); }
+.log { padding: 12px 18px 16px; border-top: 1px solid rgba(255,255,255,.06); display: grid; gap: 4px; }
+.log div { display: grid; grid-template-columns: auto auto 1fr auto; gap: 12px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); direction: ltr; }
+.log div b { font-weight: 500; color: var(--ink-2); text-align: left; }
+.log div::before { content: "•"; color: var(--lime); }
+
+/* --- sections ----------------------------------------------------------------------- */
+section.block { padding: 110px 0; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
+h2 { margin: 14px 0 14px; font-weight: 600; font-size: clamp(30px, 3.6vw, 44px); line-height: 1.2; }
+.lede { color: var(--ink-2); max-width: 46ch; margin: 0; }
+.feature { padding: 26px 0; border-top: 1px solid rgba(255,255,255,.07); }
+.feature h3 { margin: 0 0 6px; font-weight: 600; font-size: 21px; }
+.feature p { margin: 0; color: var(--ink-2); font-size: 15px; max-width: 40ch; }
+
+/* run bars */
+.bars { padding: 16px 18px 18px; display: grid; gap: 12px; }
+.bar-row { display: grid; grid-template-columns: 98px 1fr 70px; gap: 14px; align-items: center; font-size: 13px; }
+.bar-row .track { height: 6px; border-radius: 6px; background: rgba(255,255,255,.06); overflow: hidden; }
+.bar-row .track i { display: block; height: 100%; width: var(--w); border-radius: 6px; background: var(--lime); transform-origin: right; }
+.bar-row .t { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); text-align: left; direction: ltr; }
+.bar-row.wait .track i { background: rgba(255,255,255,.18); }
+.axis { display: flex; justify-content: space-between; padding: 0 18px 14px 18px; margin-inline-start: 112px; font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); direction: ltr; }
+
+/* stacked reel preview */
+.reel { width: 210px; aspect-ratio: 9 / 16; margin: 18px auto; border-radius: 22px; overflow: hidden; position: relative; border: 1px solid var(--edge); background: #000; }
+.reel .g { position: absolute; inset: 0 0 34% 0; background: url("assets/drift.webp") center / cover; -webkit-mask-image: linear-gradient(#000 78%, transparent); mask-image: linear-gradient(#000 78%, transparent); z-index: 2; }
+.reel .w { position: absolute; inset: 58% 0 0 0; background: radial-gradient(circle at 50% 45%, #1e2420 0 22%, transparent 23%), radial-gradient(circle at 50% 45%, transparent 0 30%, #2c332e 31% 36%, transparent 37%), linear-gradient(#151916, #0b0d0c); }
+.reel .w::after { content: ""; position: absolute; inset: 20% 30% 30%; border: 7px solid #3a423c; border-radius: 50%; border-bottom-color: transparent; }
+
+/* day blocks */
+.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; align-items: end; height: 220px; padding: 26px 22px 12px; }
+.day { display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+.cube { width: 34px; height: var(--h); position: relative; background: linear-gradient(90deg, #262b27, #3b423c); border-radius: 3px; }
+.cube::before { content: ""; position: absolute; left: 0; right: 0; top: -9px; height: 18px; background: #5a635c; transform: skewX(-0deg) rotate(45deg) scale(.72); border-radius: 3px; }
+.day.best .cube { background: linear-gradient(90deg, var(--lime-deep), var(--lime)); box-shadow: 0 0 24px -4px rgba(var(--lime-rgb), .6); }
+.day.best .cube::before { background: #e3ff8a; }
+.day span { font-size: 12px; color: var(--ink-3); }
+.day.best span { color: var(--lime); }
+
+/* stats */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 50px; }
+.stat .k { font-size: 12.5px; color: var(--ink-3); }
+.stat .v { font-size: 58px; font-weight: 600; line-height: 1.15; direction: ltr; text-align: right; font-feature-settings: "tnum"; }
+.stat .viz { height: 34px; margin: 10px 0 18px; display: flex; gap: 5px; align-items: center; direction: ltr; justify-content: flex-end; }
+.stat .viz i { width: 12px; height: 26px; border-radius: 3px; background: var(--lime); }
+.stat .viz i.off { background: rgba(255,255,255,.1); }
+.stat .line { height: 6px; border-radius: 6px; background: rgba(255,255,255,.08); overflow: hidden; }
+.stat .line i { display: block; height: 100%; width: 100%; background: var(--lime); }
+.stat p { margin: 0; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.08); color: var(--ink-2); font-size: 14.5px; }
+
+/* closing */
+.closer { position: relative; overflow: hidden; border-radius: 26px; background: var(--lime); color: var(--lime-ink); padding: 64px 48px; display: flex; flex-wrap: wrap; gap: 28px; align-items: center; justify-content: space-between; }
+.closer h2 { margin: 0 0 8px; color: var(--lime-ink); }
+.closer h2 em.s { color: var(--lime-ink); }
+.closer p { margin: 0; opacity: .75; }
+.closer .btn.dark { background: var(--lime-ink); color: var(--lime); }
+.closer .btn.line { background: transparent; border: 1px solid rgba(16,23,10,.35); color: var(--lime-ink); }
+
+footer { padding: 46px 0 60px; color: var(--ink-3); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 18px 28px; align-items: center; }
+footer nav { display: flex; gap: 22px; margin-inline-start: auto; }
+footer a:hover { color: var(--ink); }
+
+/* first paint: one orchestrated entrance */
+.rise { opacity: 0; transform: translateY(14px); animation: rise .9s cubic-bezier(.2,.7,.2,1) forwards; animation-delay: var(--d, 0s); }
+@keyframes rise { to { opacity: 1; transform: none; } }
+
+@media (max-width: 980px) {
+  .hero .wrap, .split { grid-template-columns: 1fr; }
+  .nav nav { display: none; }
+  .stats { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .status { display: none; }
+  .panel-head .mono { display: none; }
+  .nav .btn { margin-inline-start: auto; }
+  .hero { padding: 48px 0 70px; }
+  section.block { padding: 72px 0; }
+  .lane { grid-template-columns: 58px 1fr 84px; gap: 8px; }
+  .closer { padding: 44px 26px; }
+  .days { gap: 8px; padding-inline: 12px; }
+  .cube { width: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rise { animation: none; opacity: 1; transform: none; }
+  .road::before, .ramp .join.live { animation: none !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
 </head>
 <body>
-<div class="wrap">
+<canvas id="aurora" aria-hidden="true"></canvas>
+<div class="page">
 
-  <header>
-    <span class="logo">◎</span>
-    <div>
-      <h1>OmniPost</h1>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#"><i>»</i>OmniPost</a>
+    <nav aria-label="أقسام الصفحة">
+      <a href="#how">كيف بيشتغل</a>
+      <a href="#tools">الأدوات</a>
+      <a href="#numbers">بالأرقام</a>
+    </nav>
+    <span class="status">٦ منصات من ضغطة وحدة</span>
+    <a class="btn lime" href="./go/">ادخل</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <span class="pill rise">لأي محتوى: علوم، تقنية، قصص، سيارات</span>
+        <h1 class="rise" style="--d:.08s">مقطعك بينزل لكل المنصات، <em class="s">لحاله.</em></h1>
+        <p class="rise" style="--d:.16s">OmniPost بياخد مقطعك، بيقص أحلى لقطاته، بيحط شكل قناتك عليه، وبينشره على يوتيوب وتيك توك وإنستقرام وفيسبوك وثريدز. وأنت بس بتضغط نشر.</p>
+        <div class="cta rise" style="--d:.24s">
+          <a class="btn lime" href="./go/">ادخل لحسابك</a>
+          <a class="btn ghost" href="mailto:wael78041@gmail.com?subject=%D8%AF%D8%B9%D9%88%D8%A9%20OmniPost">اطلب دعوة</a>
+        </div>
+        <div class="fine rise" style="--d:.3s">بالدعوة بس، بدون بطاقة دفع، وبيشتغل على جهازك.</div>
+      </div>
+
+      <div class="panel rise" style="--d:.2s" aria-label="مثال على نشر مقطع واحد">
+        <div class="panel-head">
+          <span>نشر: ليش نتفليكس ما شغّلت خوارزمية المليون؟</span>
+          <span class="mono">1 clip / 5 platforms</span>
+          <span class="run" id="run-state">running</span>
+        </div>
+        <div class="lanes" id="lanes">
+          <div class="ramp">
+            <span class="chip done">المقطع<small>netflix_prize.mp4</small></span>
+            <span class="join" id="j1"></span>
+            <span class="chip" id="prep">تجهيز<small>1080×1920 · h264</small></span>
+            <span class="join" id="j2"></span>
+          </div>
+        </div>
+        <div class="log" id="log"></div>
+      </div>
     </div>
-  </header>
-  <p class="tag">Publish one video to every platform you choose, from one place.</p>
+  </section>
 
-  <p>
-    OmniPost is a personal publishing tool. You add a video once, pick which
-    social platforms it should go to, write a caption, and OmniPost uploads it to
-    each of them through their official APIs. It is built and used by a single
-    creator to publish their own content to their own accounts.
-  </p>
+  <section class="block" id="how">
+    <div class="wrap split">
+      <div>
+        <span class="pill">ليش OmniPost</span>
+        <h2>أغلب شغل النشر <em class="s">تكرار.</em></h2>
+        <p class="lede">نفس المقطع، تقصه، ترفعه على كل منصة لحال، تكتب العنوان من جديد، وتستنى. OmniPost بياخد التكرار، وبيترك لك القرار.</p>
+        <div class="feature" style="margin-top:34px">
+          <h3>ضغطة وحدة، كل المنصات</h3>
+          <p>كل منصة بتنعرض لحالها بالسجل: عم يرفع، نزل، أو ليش وقف. وفيك تعيد أي وحدة لحالها.</p>
+        </div>
+        <div class="feature">
+          <h3>إذا انقطع النت، بيكمّل</h3>
+          <p>بيستنى ويرجع يحاول لحاله، وإذا خلص حد يوتيوب اليومي بينشر بكرا الصبح. وبيبعتلك تنبيه على الجوال.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="mono">job 2b9e · run log</span><span class="run">live</span></div>
+        <div class="bars" id="bars"></div>
+        <div class="axis"><span>0s</span><span>30s</span><span>60s</span><span>90s</span><span>120s</span></div>
+      </div>
+    </div>
+  </section>
 
-  <h2>What it does</h2>
-  <ul>
-    <li>Upload a video once and publish it to several platforms in one action.</li>
-    <li>Write a different title and description per platform, or share one caption.</li>
-    <li>Schedule a post for a specific time instead of publishing immediately.</li>
-    <li>Track the status of every platform separately and retry the ones that failed.</li>
-    <li>Warn before publishing when a clip is longer or larger than a platform allows.</li>
-  </ul>
+  <section class="block" id="tools">
+    <div class="wrap split">
+      <div class="panel">
+        <div class="panel-head"><span>مقطعين بشاشة وحدة</span><span class="run">synced 12.37s</span></div>
+        <div class="reel"><div class="g"></div><div class="w"></div></div>
+        <p class="mono" style="text-align:center;padding:0 18px 18px">screen + camera → 1080×1920, matched by sound</p>
+      </div>
+      <div>
+        <span class="pill">أدوات للمونتاج</span>
+        <h2>من تسجيل طويل لريلز <em class="s">جاهز.</em></h2>
+        <div class="feature" style="margin-top:20px">
+          <h3>أحلى اللقطات لحالها</h3>
+          <p>بيقيس الصوت والحركة بكل ثانية، والذكاء الاصطناعي بيرتّب اللقطات. أنت بتشوف وبتختار.</p>
+        </div>
+        <div class="feature">
+          <h3>مقطعين بشاشة وحدة</h3>
+          <p>شاشتك مع وجهك، أو اللعب مع تصوير الجوال: بيزامنهم من الصوت لحاله، وبيحطهم فوق بعض بتدرّج ناعم.</p>
+        </div>
+        <div class="feature">
+          <h3>شكل قناتك على كل مقطع</h3>
+          <p>الشعار بالزاوية، جملة بأول ثلاث ثواني، ألوان أقوى، أو مونتاج من كذا لقطة.</p>
+        </div>
+      </div>
+    </div>
 
-  <h2>Supported platforms</h2>
-  <div class="platforms">
-    <span class="chip">YouTube</span>
-    <span class="chip">TikTok</span>
-    <span class="chip">Instagram</span>
-    <span class="chip">Facebook</span>
+    <div class="wrap split" style="margin-top:90px">
+      <div>
+        <span class="pill">الجدولة</span>
+        <h2>بينشر بالوقت اللي <em class="s">بيشوفوك</em> فيه.</h2>
+        <p class="lede">من أرقام منشوراتك أنت، مو من نصيحة عامة. وكل مقطع بيروح لأول موعد فاضي بجدولك.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span>أحسن يوم للنشر</span><span class="mono">example data</span></div>
+        <div class="days">
+          <div class="day"><div class="cube" style="--h:42%"></div><span>سبت</span></div>
+          <div class="day"><div class="cube" style="--h:55%"></div><span>أحد</span></div>
+          <div class="day"><div class="cube" style="--h:48%"></div><span>اثنين</span></div>
+          <div class="day"><div class="cube" style="--h:61%"></div><span>ثلاثاء</span></div>
+          <div class="day"><div class="cube" style="--h:66%"></div><span>أربعاء</span></div>
+          <div class="day best"><div class="cube" style="--h:88%"></div><span>خميس</span></div>
+          <div class="day"><div class="cube" style="--h:74%"></div><span>جمعة</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="numbers">
+    <div class="wrap">
+      <span class="pill">بالأرقام</span>
+      <h2>أرقام من الكود، <em class="s">مو</em> من الإعلان.</h2>
+      <div class="stats">
+        <div class="stat">
+          <div class="k">المنصات</div>
+          <div class="v">6</div>
+          <div class="viz"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <p>يوتيوب، تيك توك، إنستقرام، فيسبوك، ثريدز، وبيليبيلي بتجهيز الملف.</p>
+        </div>
+        <div class="stat">
+          <div class="k">محاولات لحاله</div>
+          <div class="v">6</div>
+          <div class="viz"><i></i><i></i><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i></div>
+          <p>إذا فشل النشر، بيرجع يحاول بفترات أطول كل مرة، وما بيحسب لما النت مقطوع.</p>
+        </div>
+        <div class="stat">
+          <div class="k">فحص الرابط العام</div>
+          <div class="v">60s</div>
+          <div class="viz" style="justify-content:stretch"><div class="line" style="flex:1"><i></i></div></div>
+          <p>كل دقيقة بيتأكد إن الموقع بيفتح من برّا، وإذا وقف بيصلّحه وبيخبرك.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="closer">
+        <div>
+          <h2>جاهز تنشر مقطعك <em class="s">الجاي؟</em></h2>
+          <p>إذا عندك دعوة ادخل. إذا لا، راسلني.</p>
+        </div>
+        <div class="cta">
+          <a class="btn dark" href="./go/">ادخل لحسابك</a>
+          <a class="btn line" href="mailto:wael78041@gmail.com?subject=%D8%AF%D8%B9%D9%88%D8%A9%20OmniPost">اطلب دعوة</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#"><i>»</i>OmniPost</a>
+    <nav aria-label="روابط">
+      <a href="app.html" lang="en">About the app</a>
+      <a href="privacy.html">الخصوصية</a>
+      <a href="terms.html">الشروط</a>
+      <a href="mailto:wael78041@gmail.com">تواصل</a>
+    </nav>
   </div>
-
-  <div class="card">
-    <h2 style="margin-top:0">How your account is used</h2>
-    <p style="margin-bottom:0">
-      OmniPost connects to a platform only after you sign in on that platform's own
-      page and approve access. It never sees or stores your password. The access it
-      receives is used for one thing: uploading the videos you choose to your own
-      account. Nothing is posted without you starting it.
-    </p>
-  </div>
-
-  <footer>
-    <a href="./privacy.html">Privacy Policy</a> &nbsp;·&nbsp;
-    <a href="./terms.html">Terms of Service</a>
-  </footer>
-
+</footer>
 </div>
+
+<script>
+(function () {
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* --- the light ribbons ------------------------------------------------------------ */
+  const cv = document.getElementById("aurora");
+  const cx = cv.getContext("2d");
+  let W = 0, H = 0, dpr = 1;
+  function size() {
+    // Half resolution on purpose: the glow is soft, so nobody can tell, and it
+    // quarters the work on a phone.
+    dpr = 0.5;
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  size();
+  addEventListener("resize", size);
+  // A bundle of strands that pinches together and fans out again, sweeping
+  // from the bottom corner up across the page - the light-trail look. Each
+  // strand is drawn twice with additive light: a wide faint pass for the glow
+  // and a thin bright pass for the core, which reads as luminous without the
+  // cost of a blur filter every frame.
+  const STRANDS = 30;
+  let ACC = "77,163,255";
+  const readAcc = () => { ACC = getComputedStyle(document.documentElement).getPropertyValue("--lime-rgb").replace(/\s/g, "") || ACC; };
+  readAcc();
+  function strand(k, s, scroll, x) {
+    const u = x / W;
+    // tight where the light is brightest, fanned out towards the edges
+    const pinch = 0.12 + 0.88 * Math.min(1, Math.abs(u - 0.42 - 0.04 * Math.sin(s * 0.2)) * 2.2);
+    const spread = (k - 0.5) * 260 * pinch;
+    return H * (0.86 - 0.7 * u - 0.22 * scroll)
+      + Math.sin(u * Math.PI * 1.35 + 0.4 + s * 0.22 + k * 0.5) * H * 0.2
+      + Math.sin(u * 7.0 - s * 0.3 + k * 4.0) * 10 * pinch
+      + spread;
+  }
+  let last = 0;
+  function frame(t) {
+    if (!still && t - last < 33) { requestAnimationFrame(frame); return; }   // ~30 fps is plenty for drifting light
+    last = t;
+    cx.globalCompositeOperation = "source-over";
+    cx.fillStyle = "#09090B";
+    cx.fillRect(0, 0, W, H);
+    cx.globalCompositeOperation = "lighter";
+    const s = t / 1000;
+    const scroll = scrollY / Math.max(1, document.body.scrollHeight - H);
+    for (let i = 0; i < STRANDS; i++) {
+      const k = i / (STRANDS - 1);
+      const violet = k > 0.8;
+      const rgb = violet ? "156,130,255" : (k < 0.18 ? "120,220,255" : ACC);
+      const calm = W < 700 ? 0.28 : 1;    // a phone has text on top of the light everywhere
+      for (const [width, alpha] of [[8, 0.02 * calm], [1.6, (violet ? 0.22 : 0.32) * calm]]) {
+        cx.strokeStyle = `rgba(${rgb},${alpha})`;
+        cx.lineWidth = width;
+        cx.beginPath();
+        for (let x = -60; x <= W + 60; x += 16) {
+          const y = strand(k, s, scroll, x);
+          x === -60 ? cx.moveTo(x, y) : cx.lineTo(x, y);
+        }
+        cx.stroke();
+      }
+    }
+    // the bright core where the bundle is tightest
+    const g = cx.createRadialGradient(W * 0.42, H * 0.5, 0, W * 0.42, H * 0.5, Math.max(W, H) * 0.3);
+    g.addColorStop(0, `rgba(${ACC},${W < 700 ? 0.05 : 0.16})`);
+    g.addColorStop(1, `rgba(${ACC},0)`);
+    cx.fillStyle = g;
+    cx.fillRect(0, 0, W, H);
+    // keep the reading side calm: darken behind the text column
+    const shade = cx.createLinearGradient(W, 0, W * 0.45, 0);
+    shade.addColorStop(0, "rgba(9,9,11,0.55)");
+    shade.addColorStop(1, "rgba(9,9,11,0)");
+    cx.globalCompositeOperation = "source-over";
+    cx.fillStyle = shade;
+    cx.fillRect(0, 0, W, H);
+    if (!still) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* --- the publishing road ------------------------------------------------------------- */
+  const PLATS = [["youtube", "يوتيوب"], ["tiktok", "تيك توك"], ["instagram", "إنستقرام"], ["facebook", "فيسبوك"], ["threads", "ثريدز"]];
+  document.getElementById("lanes").insertAdjacentHTML("beforeend", PLATS.map(([id, name]) =>
+    `<div class="lane" id="l-${id}"><span>${name}</span><span class="road"><i class="clip"></i></span><span class="st">waiting</span></div>`).join(""));
+
+  const log = document.getElementById("log");
+  const lines = [];
+  function say(text, ms) {
+    const now = new Date();
+    lines.unshift(`<div><span>${now.toTimeString().slice(0, 8)}</span><b>${text}</b><span>${ms} ms</span></div>`);
+    log.innerHTML = lines.slice(0, 3).join("");
+  }
+  function setLane(id, st, cls) {
+    const el = document.getElementById("l-" + id);
+    el.classList.remove("live", "done");
+    if (cls) el.classList.add(cls);
+    el.querySelector(".st").textContent = st;
+  }
+  function play() {
+    PLATS.forEach(([p]) => setLane(p, "waiting"));
+    ["j1", "j2"].forEach((j) => document.getElementById(j).classList.remove("live"));
+    document.getElementById("prep").classList.remove("done");
+    document.getElementById("run-state").textContent = "running";
+    document.getElementById("j1").classList.add("live");
+    say("prepare 1080x1920", 412);
+    setTimeout(() => { document.getElementById("prep").classList.add("done"); document.getElementById("j2").classList.add("live"); }, 700);
+    PLATS.forEach(([p], i) => {
+      setTimeout(() => setLane(p, "uploading…", "live"), 900 + i * 420);
+      setTimeout(() => {
+        setLane(p, "published ✓", "done");
+        say(`${p} published`, 180 + Math.round(Math.random() * 260));
+        if (i === PLATS.length - 1) document.getElementById("run-state").textContent = "done";
+      }, 2000 + i * 420);
+    });
+  }
+  if (still) {
+    PLATS.forEach(([p]) => setLane(p, "published ✓", "done"));
+    document.getElementById("prep").classList.add("done");
+    document.getElementById("run-state").textContent = "done";
+    say("threads published", 214);
+  } else {
+    play();
+    setInterval(play, 9000);
+  }
+
+  /* --- colour trials ------------------------------------------------------------------ */
+  const COLS = [["blue", "#4DA3FF", "أزرق"], ["lime", "#C8F542", "ليموني"], ["orange", "#FF8A1F", "برتقالي"], ["cyan", "#3FE0F5", "سماوي"], ["gold", "#FFC83D", "ذهبي"], ["pink", "#FF5C8A", "زهري"]];
+  const sw = document.createElement("div");
+  sw.className = "swatches";
+  sw.setAttribute("aria-label", "جرّب لون");
+  sw.innerHTML = COLS.map(([c, hex, name]) => `<button style="--sw:${hex}" data-c="${c}" title="${name}" aria-label="${name}"></button>`).join("");
+  if (new URLSearchParams(location.search).has("try")) document.body.append(sw);
+  function pick(c) {
+    if (c === "blue") document.documentElement.removeAttribute("data-c"); else document.documentElement.dataset.c = c;
+    sw.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.c === c));
+    readAcc();
+    if (still) requestAnimationFrame(frame);
+  }
+  sw.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) pick(b.dataset.c); });
+  pick(new URLSearchParams(location.search).get("c") || "blue");
+
+  /* --- run bars ----------------------------------------------------------------------- */
+  const RUN = [["تجهيز", 18, "18.2s"], ["يوتيوب", 64, "64.0s"], ["تيك توك", 41, "41.5s"], ["إنستقرام", 52, "52.3s"], ["فيسبوك", 37, "37.9s"], ["ثريدز", 23, "23.1s"]];
+  document.getElementById("bars").innerHTML = RUN.map(([n, w, t]) =>
+    `<div class="bar-row"><span>${n}</span><span class="track"><i style="--w:${w * 100 / 120}%"></i></span><span class="t">${t}</span></div>`).join("");
+})();
+</script>
 </body>
 </html>

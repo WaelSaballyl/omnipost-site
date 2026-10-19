@@ -56,7 +56,7 @@ em.s { font-family: var(--serif); font-style: italic; font-weight: 700; letter-s
 .nav { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(14px); background: rgba(9, 9, 11, .55); border-bottom: 1px solid rgba(255,255,255,.05); }
 .nav .wrap { display: flex; align-items: center; gap: 28px; height: 66px; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; }
-.brand i { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; background: var(--lime); color: var(--lime-ink); font-style: normal; font-weight: 700; font-size: 15px; }
+.brand img { width: 26px; height: 26px; border-radius: 7px; display: block; }
 .nav nav { display: flex; gap: 26px; font-size: 14px; color: var(--ink-2); }
 .nav nav a:hover { color: var(--ink); }
 .status { margin-inline-start: auto; display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border-radius: 99px; border: 1px solid var(--edge); font-size: 12.5px; color: var(--ink-2); }
@@ -186,6 +186,21 @@ footer a:hover { color: var(--ink); }
   .days { gap: 8px; padding-inline: 12px; }
   .cube { width: 24px; }
 }
+/* The first screen shows the whole hero - headline, buttons and the panel -
+   on any laptop, scaled displays included: sizes follow the window's height
+   as well as its width, so a short window gets a smaller hero, not a cut one. */
+@media (min-width: 981px) {
+  .hero { min-height: calc(100svh - 66px); display: flex; align-items: center; padding: clamp(16px, 4vh, 64px) 0; box-sizing: border-box; }
+  .hero h1 { font-size: clamp(34px, min(5.4vw, 8.4vh), 68px); margin: clamp(10px, 2.4vh, 22px) 0 clamp(8px, 2vh, 18px); }
+  .hero p { font-size: clamp(14.5px, 2.7vh, 17px); margin-bottom: clamp(14px, 3.4vh, 30px); }
+  .hero .fine { margin-top: clamp(8px, 2vh, 18px); }
+  .panel-head { padding-block: clamp(9px, 1.9vh, 14px); }
+  .lanes { padding-block: clamp(8px, 1.9vh, 16px) clamp(6px, 1.2vh, 10px); gap: clamp(3px, .9vh, 9px); }
+  .ramp .chip { padding-block: clamp(4px, .9vh, 7px); }
+  .lane { height: clamp(28px, 5.2vh, 38px); }
+  .road { height: clamp(22px, 4.2vh, 30px); }
+  .log { padding-block: clamp(8px, 1.6vh, 12px) clamp(10px, 2vh, 16px); }
+}
 @media (prefers-reduced-motion: reduce) {
   .rise { animation: none; opacity: 1; transform: none; }
   .road::before, .ramp .join.live { animation: none !important; }
@@ -199,7 +214,7 @@ footer a:hover { color: var(--ink); }
 
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="#"><i>»</i>OmniPost</a>
+    <a class="brand" href="#"><img src="assets/icon.png" alt="" width="26" height="26">OmniPost</a>
     <nav aria-label="أقسام الصفحة">
       <a href="#how">كيف بيشتغل</a>
       <a href="#tools">الأدوات</a>
@@ -357,7 +372,7 @@ footer a:hover { color: var(--ink); }
 
 <footer>
   <div class="wrap">
-    <a class="brand" href="#"><i>»</i>OmniPost</a>
+    <a class="brand" href="#"><img src="assets/icon.png" alt="" width="26" height="26">OmniPost</a>
     <nav aria-label="روابط">
       <a href="app.html" lang="en">About the app</a>
       <a href="privacy.html">الخصوصية</a>
